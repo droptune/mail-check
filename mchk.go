@@ -249,7 +249,6 @@ func createDefaultConfig(configPath string) error {
 	finalConfigPath := path.Join(configDirectory, filepath.Base(configPath))
 	_, err := os.Stat(configDirectory)
 	if err != nil || os.IsNotExist(err) {
-		log.Println("Config directory not found")
 		err := os.MkdirAll(configDirectory, os.ModePerm)
 		if err != nil {
 			log.Fatal(err)
@@ -288,7 +287,7 @@ func main() {
 
 	if currentConfig == "" {
 		fmt.Println("No config file found.")
-		createDefaultConfig("~./config/" + appName + "/config.yml")
+		createDefaultConfig("~/.config/" + appName + "/config.yml")
 		os.Exit(1)
 	}
 
