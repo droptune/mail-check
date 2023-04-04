@@ -1,0 +1,18 @@
+.\" Manpage for mchk
+.TH man 1 "05 Apr 2023" "0.0.1" "mchk"
+.SH NAME
+mchk \- test mail server
+.SH SYNOPSIS
+.B mchk
+.SH DESCRIPTION
+mchk is a tool to test email server by sending messages from specified smtp server to specified address and then checking by IMAP whether this test message is received.
+.SH OPTIONS
+mchk does not take any options.
+.SH CONFIGURATION
+On first run
+.BR mchk
+creates example configuration file at
+.I ~/.config/mchk/config.yml
+.PP Configuration is in YAML format and consists of one or more test configurations.
+.SH AUTHOR
+Dmitriy Gantshel https://github.com/droptune/
