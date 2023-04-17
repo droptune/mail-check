@@ -33,7 +33,8 @@ var Gray = "\033[37m"
 var White = "\033[97m"
 
 func init() {
-	if runtime.GOOS == "windows" {
+	fileInfo, _ := os.Stdout.Stat()
+	if runtime.GOOS == "windows" || (fileInfo.Mode()&os.ModeCharDevice) == 0 {
 		Reset = ""
 		Red = ""
 		Green = ""
