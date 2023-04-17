@@ -1,17 +1,26 @@
 .\" Manpage for mchk
-.TH man 1 "05 Apr 2023" "0.0.1" "mchk"
+.TH man 1 "17 Apr 2023" "0.1.0" "mchk"
 .SH NAME
 mchk \- test mail server
 .SH SYNOPSIS
-.B mchk
+.B mchk [--config configuration_file]
 .SH DESCRIPTION
 mchk is a tool to test email server by sending messages from specified smtp server to specified address and then checking by IMAP whether this test message is received.
 .SH OPTIONS
-mchk does not take any options.
+.TP
+.B \-\-config configuration_file
+Specify path to configuration file.
 .SH CONFIGURATION
-On first run
+By default configuraton file is expected to be in those locations (in this order):
+.IR ~/.config/mchk/mchk.yml
+or
+.IR ~/.mchk.yml
+or 
+.IR mchk.yml
+in current directory.
+If no configuration file found
 .B mchk
-creates example configuration file at
+tries to create example file at
 .I ~/.config/mchk/config.yml
 .PP Configuration is in YAML format and consists of one or more test configurations.
 .SH AUTHOR

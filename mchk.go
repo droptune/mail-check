@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -215,6 +216,18 @@ func getMessageByIMAP(cfg TestConfig, s string) error {
 	return nil
 }
 
+func addHomeDir(dir string) string {
+	if strings.HasPrefix(dir, "~/") {
+		userdir, err := os.UserHomeDir()
+		if err != nil {
+			log.Fatal("Can't get current home directory for config path. You may have to specify path explicitly with --config <path_to_config>")
+		}
+		return path.Join(path.Dir(userdir+"/"), path.Dir(strings.TrimPrefix(dir, "~/")))
+	} else {
+		return dir
+	}
+}
+
 func createDefaultConfig(configPath string) error {
 	defaultConfig := `---
 	continue_on_errors: no
@@ -235,19 +248,8 @@ func createDefaultConfig(configPath string) error {
 		imap_password: password
 		leave_message: no`
 
-	var configDirectory string
+	configDirectory := filepath.Dir(configPath)
 
-	if strings.HasPrefix(configPath, "~/") {
-		userdir, err := os.UserHomeDir()
-		if err != nil {
-			return err
-		}
-		configDirectory = path.Join(path.Dir(userdir+"/"), path.Dir(strings.TrimPrefix(configPath, "~/")))
-	} else {
-		configDirectory = filepath.Dir(configPath)
-	}
-
-	finalConfigPath := path.Join(configDirectory, filepath.Base(configPath))
 	_, err := os.Stat(configDirectory)
 	if err != nil || os.IsNotExist(err) {
 		err := os.MkdirAll(configDirectory, os.ModePerm)
@@ -255,6 +257,8 @@ func createDefaultConfig(configPath string) error {
 			log.Fatal(err)
 		}
 	}
+
+	finalConfigPath := path.Join(configDirectory, filepath.Base(configPath))
 	f, err := os.Create(finalConfigPath)
 	if err != nil {
 		log.Fatal(err)
@@ -308,9 +312,19 @@ func waitFor(t int) {
 }
 
 func main() {
-	configPaths := []string{"~/.config/" + appName + "/" + appName + ".yml",
-		"~/." + appName + ".yml",
-		"./mchk.yml"}
+	configArgPtr := flag.String("config", "", "path to configuration file")
+
+	flag.Parse()
+
+	var configPaths []string
+
+	if *configArgPtr == "" {
+		configPaths = append(configPaths, addHomeDir("~/.config/"+appName+"/"+appName+".yml"),
+			addHomeDir("~/."+appName+".yml"),
+			"./mchk.yml")
+	} else {
+		configPaths = append(configPaths, *configArgPtr)
+	}
 
 	currentConfig := ""
 
@@ -325,7 +339,11 @@ func main() {
 
 	if currentConfig == "" {
 		fmt.Println("No config file found.")
-		createDefaultConfig("~/.config/" + appName + "/config.yml")
+		defaultConfigPath := addHomeDir("~/.config/" + appName + "/" + appName + ".yml")
+		_, err := os.Stat(defaultConfigPath)
+		if err != nil || os.IsNotExist(err) {
+			createDefaultConfig(defaultConfigPath)
+		}
 		os.Exit(1)
 	}
 
