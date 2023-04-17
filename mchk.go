@@ -269,6 +269,43 @@ func createDefaultConfig(configPath string) error {
 	return nil
 }
 
+func waitFor(t int) {
+	quantifier := "seconds"
+	if t == 1 {
+		quantifier = "second"
+	}
+	// Check if we are on real terminal
+	if fileInfo, _ := os.Stdout.Stat(); (fileInfo.Mode() & os.ModeCharDevice) != 0 {
+		spinner := [8]string{"⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"}
+		i := 0
+		ch := make(chan int)
+
+		go func() {
+			time.Sleep(time.Duration(t) * time.Second)
+			ch <- 1
+			close(ch)
+		}()
+
+	out:
+		for {
+			select {
+			case <-ch:
+				fmt.Printf("\r%d %s passed. %s✔%s             \n", t, quantifier, Green, Reset)
+				break out
+			default:
+				i = i % len(spinner)
+				time.Sleep(100 * time.Millisecond)
+				fmt.Printf("\rWaiting for %d %s... %s ", t, quantifier, spinner[i])
+				i += 1
+			}
+		}
+	} else {
+		fmt.Printf("Waiting for %d %s... ", t, quantifier)
+		time.Sleep(time.Duration(t) * time.Second)
+		fmt.Println(Green + "✔" + Reset)
+	}
+}
+
 func main() {
 	configPaths := []string{"~/.config/" + appName + "/" + appName + ".yml",
 		"~/." + appName + ".yml",
@@ -327,7 +364,7 @@ func main() {
 			fmt.Println(Green + "✔" + Reset)
 		}
 
-		time.Sleep(time.Duration(test.WaitFor) * time.Second)
+		waitFor(test.WaitFor)
 
 		err = getMessageByIMAP(test, subject)
 		if err != nil {
