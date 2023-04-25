@@ -1,4 +1,6 @@
 # mchk
+[![ru](https://img.shields.io/badge/lang-ru-green.svg)](https://github.com/droptune/mail-check/blob/master/README.ru.md)
+
 Simple program written in Go to test your email service.
 
 Sends test message through the specified server and checks by IMAP if this message was received.
