@@ -13,7 +13,7 @@ Put tests in `mchk.yml` configuration file (see next section) and run `mchk`.
 
 ## Configuration
 
-Configuration is in [https://yaml.org/](YAML) format. On first run example configuration file will be put into `~/.config/mchk/config.yml`.
+Configuration is in [YAML](https://yaml.org/) format. On first run example configuration file will be put into `~/.config/mchk/config.yml`.
 
 Program searches for configuration in those locations in this order:
  - `~/.config/mchk/mchk.yml`
