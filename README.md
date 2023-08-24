@@ -45,6 +45,7 @@ tests:
     # Set to 'no' if you expect this message to be absent
     should_receive: yes
     imap_server: imap.example.com
+    imap_tls: yes
     # imap_port is optional. Default is 993
     imap_port: 993
     imap_login: user@example.com

@@ -68,6 +68,7 @@ type TestConfig struct {
 	WaitFor        int    `yaml:"wait_for"`
 	ShouldReceive  bool   `yaml:"should_receive"`
 	IMAPServer     string `yaml:"imap_server"`
+	IMAPTLS        bool   `yaml:"imap_tls"`
 	IMAPPort       string `yaml:"imap_port"`
 	IMAPLogin      string `yaml:"imap_login"`
 	IMAPPassword   string `yaml:"imap_password"`
@@ -165,26 +166,39 @@ func sendMessage(config TestConfig, subject string) error {
 func getMessageByIMAP(cfg TestConfig, s string) error {
 	fmt.Printf("Connecting to IMAP server " + cfg.IMAPServer + ":" + cfg.IMAPPort + "... ")
 
-	c, err := client.DialTLS(cfg.IMAPServer+":"+cfg.IMAPPort, nil)
-	if err != nil {
-		fmt.Printf(Red + "✖" + Reset + "\n")
-		return err
+	var c *client.Client
+	var err error
+
+	if cfg.IMAPTLS {
+		c, err = client.DialTLS(cfg.IMAPServer+":"+cfg.IMAPPort, nil)
+		if err != nil {
+			fmt.Printf(Red + "✖" + Reset + "\n")
+			return err
+		}
+	} else {
+		c, err = client.Dial(cfg.IMAPServer + ":" + cfg.IMAPPort)
+		if err != nil {
+			fmt.Printf(Red + "✖" + Reset + "\n")
+			return err
+		}
 	}
 	fmt.Printf(Green + "✔" + Reset + "\n")
 	defer c.Logout()
 
 	if err := c.Login(cfg.IMAPLogin, cfg.IMAPPassword); err != nil {
+		fmt.Printf(Red + "✖" + Reset + "\n")
 		return err
 	}
 
 	_, err = c.Select("INBOX", false)
 
 	if err != nil {
+		fmt.Printf(Red + "✖" + Reset + "\n")
 		log.Fatal(err)
 	}
 
 	criteria := imap.NewSearchCriteria()
-	criteria.Header = map[string][]string{"Subject": []string{s}}
+	criteria.Header = map[string][]string{"Subject": {s}}
 	ids, err := c.Search(criteria)
 	if err != nil {
 		return err
@@ -233,20 +247,21 @@ func createDefaultConfig(configPath string) error {
 	continue_on_errors: no
 	tests:
 	  - name: test example
-	    should_send: yes
-		smtp_server: smtp.example.com
-		smtp_port: 25
-		send_from: user@example.com
-		send_to: user@example.com
-		sender_login: user@example.com
-		sender_password: password
-		wait_for: 2
-		should_receive: yes
-		imap_server: imap.example.com
-		imap_port: 993
-		imap_login: user@example.com
-		imap_password: password
-		leave_message: no`
+	  should_send: yes
+	  smtp_server: smtp.example.com
+	  smtp_port: 25
+	  send_from: user@example.com
+	  send_to: user@example.com
+	  sender_login: user@example.com
+	  sender_password: password
+	  wait_for: 2
+	  should_receive: yes
+	  imap_server: imap.example.com
+	  imap_tls: yes
+	  imap_port: 993
+	  imap_login: user@example.com
+	  imap_password: password
+	  leave_message: no`
 
 	configDirectory := filepath.Dir(configPath)
 
