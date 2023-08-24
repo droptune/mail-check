@@ -193,7 +193,7 @@ func getMessageByIMAP(cfg TestConfig, s string) error {
 	_, err = c.Select("INBOX", false)
 
 	if err != nil {
-    return err
+		return err
 	}
 
 	criteria := imap.NewSearchCriteria()
