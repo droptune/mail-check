@@ -395,9 +395,8 @@ func main() {
 			}
 		} else {
 			fmt.Println(Green + "✔" + Reset)
+			waitFor(test.WaitFor)
 		}
-
-		waitFor(test.WaitFor)
 
 		err = getMessageByIMAP(test, subject)
 		if err != nil {
